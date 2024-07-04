@@ -22,13 +22,13 @@
             </a>            
             <ul class="side-menu__sub-open" style="display: block;">
                 <li>
-                    <a href="<?php echo $url . '/views/teachers/teachers-list.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/teachers/teachers-crud.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="list"></i> </div>
                         <div class="side-menu__title"> Listar Profesores </div>
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $url . '/views/teachers/add-teacher.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/teachers/teachers-register.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="plus"></i> </div>
                         <div class="side-menu__title"> Añadir Profesor </div>
                     </a>
@@ -45,13 +45,13 @@
             </a>            
             <ul class="side-menu__sub-open" style="display: block;">
                 <li>
-                    <a href="<?php echo $url . '/views/subjects/subject-list.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/subjects/subjects-crud.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="list"></i> </div>
                         <div class="side-menu__title"> Listar Asignaturas </div>
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $url . '/views/subjects/add-subject.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/subjects/subjects-register.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="plus"></i> </div>
                         <div class="side-menu__title"> Añadir Asignatura </div>
                     </a>
@@ -62,21 +62,22 @@
             <a href="javascript:;" class="side-menu side-menu--open">
                 <div class="side-menu__icon"> <i data-feather="map"></i> </div>
                 <div class="side-menu__title">
-                    Cedes 
+                    Sedes 
                     <i data-feather="chevron-down" class="side-menu__sub-icon transform rotate-180"></i>
                 </div>
             </a>            
             <ul class="side-menu__sub-open" style="display: block;">
                 <li>
-                    <a href="<?php echo $url . '/views/cedes/cede-list.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/locations/locations-crud.php'; ?>" class="side-menu">
+
                         <div class="side-menu__icon"> <i data-feather="list"></i> </div>
-                        <div class="side-menu__title"> Listar Cedes </div>
+                        <div class="side-menu__title"> Listar Sedes </div>
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $url . '/views/cedes/add-cede.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/locations/locations-register.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="plus"></i> </div>
-                        <div class="side-menu__title"> Añadir Cede </div>
+                        <div class="side-menu__title"> Añadir Sede </div>
                     </a>
                 </li>
             </ul>
