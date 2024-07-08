@@ -1,12 +1,15 @@
 <?php
+// Archivo principal (index.php)
+
 // Verificar si la sesión no está iniciada
 if (session_status() == PHP_SESSION_NONE) {
     ini_set('session.cache_limiter', 'public');
     session_cache_limiter(false);
     session_start();
 }
+
 // Inclusión del archivo de configuración
-require_once dirname(__DIR__) . "../../config.php";
+require_once __DIR__ . "/../../config.php";
 
 try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -47,6 +50,8 @@ try {
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
+
+$dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 ?>
 
 <!DOCTYPE html>
@@ -98,11 +103,7 @@ try {
             <div class="container mt-5"></div>
 
             <div class="intro-y box mt-5">
-                <div class="flex flex-col sm:flex-row items-center p-5 border-b border-gray-200">
-                    <h2 class="font-medium text-base mr-auto">
-                        Header & Footer Modal
-                    </h2>
-                </div>
+                
                 <div class="p-5" id="header-footer-modal">
                     <div class="preview">
                         <div class="text-center">
@@ -112,7 +113,7 @@ try {
                             <div class="modal-dialog">
                                 <div class="modal-header"></div>
                                 <div class="modal-body">
-                                    <form id="modal-form">
+                                    <form id="modal-form" method="POST" action="guardar_horario.php">
                                         <div class="grid grid-cols-12 gap-4 row-gap-3">
                                             <div class="col-span-12">
                                                 <label>Sede</label>
@@ -120,7 +121,7 @@ try {
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Día</label>
-                                                <select class="input w-full border mt-2 flex-1">
+                                                <select name="dia" class="input w-full border mt-2 flex-1">
                                                     <?php foreach ($dias as $dia): ?>
                                                         <option value="<?php echo $dia; ?>"><?php echo $dia; ?></option>
                                                     <?php endforeach; ?>
@@ -128,7 +129,7 @@ try {
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Horario</label>
-                                                <select class="input w-full border mt-2 flex-1">
+                                                <select name="hora" class="input w-full border mt-2 flex-1">
                                                     <?php
                                                     $start_time = new DateTime('08:00:00');
                                                     $end_time = new DateTime('21:00:00');
@@ -141,7 +142,7 @@ try {
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Asignatura</label>
-                                                <select class="input w-full border mt-2 flex-1">
+                                                <select name="asignatura" class="input w-full border mt-2 flex-1">
                                                     <?php foreach ($asignaturas as $asignatura): ?>
                                                         <option value="<?php echo $asignatura['id_asignatura']; ?>"><?php echo $asignatura['asignatura_nombre']; ?></option>
                                                     <?php endforeach; ?>
@@ -149,7 +150,7 @@ try {
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Profesor</label>
-                                                <select class="input w-full border mt-2 flex-1">
+                                                <select name="profesor" class="input w-full border mt-2 flex-1">
                                                     <?php foreach ($profesores as $profesor): ?>
                                                         <option value="<?php echo $profesor['id_profesor']; ?>"><?php echo $profesor['profesor_nombre'] . ' ' . $profesor['profesor_apellido']; ?></option>
                                                     <?php endforeach; ?>
@@ -160,7 +161,7 @@ try {
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="button w-20 border text-gray-700 mr-1" data-dismiss="modal">Cancel</button>
-                                    <button type="button" class="button w-20 bg-theme-1 text-white">Save</button>
+                                    <button type="submit" form="modal-form" class="button w-20 bg-theme-1 text-white">Guardar</button>
                                 </div>
                             </div>
                         </div>
@@ -176,9 +177,7 @@ try {
                         <thead>
                             <tr>
                                 <th class="text-center">Hora</th>
-                                <?php
-                                $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-                                foreach ($dias as $dia): ?>
+                                <?php foreach ($dias as $dia): ?>
                                     <th class="text-center"><?php echo $dia; ?></th>
                                 <?php endforeach; ?>
                             </tr>
