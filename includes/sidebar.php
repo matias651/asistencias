@@ -2,7 +2,7 @@
 <nav class="side-nav">
     <a href="" class="intro-x flex items-center pl-5 pt-4">    
         <img alt="Midone Tailwind HTML Admin Template" class="w-6" src="<?php echo $url . '/static resources/images/logo.svg'; ?>">
-        <span class="hidden xl:block text-white text-lg ml-3"> Mid<span class="font-medium">one</span> </span>
+        <span class="hidden xl:block text-white text-lg ml-3"> <span class="font-medium"></span> </span>
     </a>
     <div class="side-nav__devider my-6"></div>
     <ul>
@@ -92,13 +92,13 @@
             </a>            
             <ul class="side-menu__sub-open" style="display: block;">
                 <li>
-                    <a href="<?php echo $url . '/views/pagos/pago-list.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/payments/payments_list.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="list"></i> </div>
                         <div class="side-menu__title"> Listar Pagos </div>
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo $url . '/views/pagos/add-pago.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/payments/payments_register.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="plus"></i> </div>
                         <div class="side-menu__title"> Añadir Pago </div>
                     </a>

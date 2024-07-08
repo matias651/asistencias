@@ -3,7 +3,7 @@
 
 // Variables de configuración de la base de datos
 $host = "localhost";
-$dbname = "";
+$dbname = "dbasist";
 $username = "root";
 $password = "";
 
@@ -22,9 +22,9 @@ $fechahora = date('YmdHis');
 
 // Si la aplicación se ejecuta en un servidor remoto
 if ($_SERVER['HTTP_HOST'] !== 'localhost' && $_SERVER['HTTP_HOST'] !== '127.0.0.1') {
-    $url = "http://" . $_SERVER['HTTP_HOST'] . "/asistencias";
+    $url = "http://" . $_SERVER['HTTP_HOST'] . "/inst-asistencias";
 } else {
-    $url = "http://localhost/asistencias";
+    $url = "http://localhost/inst-asistencias";
 }
 
 $base_path = __DIR__;

@@ -6,7 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();  
 }
 // Inclusión del archivo de configuración
-require_once dirname(__DIR__) . "../../config.php"; // Uso de una ruta absoluta
+require_once  "../../config.php"; // Uso de una ruta absoluta
 ?>
 
 <!DOCTYPE html>
