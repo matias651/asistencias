@@ -22,9 +22,9 @@ $fechahora = date('YmdHis');
 
 // Si la aplicación se ejecuta en un servidor remoto
 if ($_SERVER['HTTP_HOST'] !== 'localhost' && $_SERVER['HTTP_HOST'] !== '127.0.0.1') {
-    $url = "http://" . $_SERVER['HTTP_HOST'] . "/inst-asistencias";
+    $url = "http://" . $_SERVER['HTTP_HOST'] . "/asistencias";
 } else {
-    $url = "http://localhost/inst-asistencias";
+    $url = "http://localhost/asistencias";
 }
 
 $base_path = __DIR__;
