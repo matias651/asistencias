@@ -56,9 +56,14 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <!-- Tu CSS personalizado -->
     <link href="<?php echo $url . '/static resources/css/modal.css'; ?>" rel="stylesheet">
     <link href="<?php echo $url . '/static resources/css/app.css'; ?>" rel="stylesheet">    
+    <link href="<?php echo $url . '/static resources/css/paginator.css'; ?>" rel="stylesheet"> 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.1/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.1/dist/tailwind.min.js"></script>
+    <!-- Librerías para exportar a Excel y PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
 </head>
 <!-- END: Head -->
 <body class="app">
@@ -142,13 +147,13 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </button>
                         <div class="dropdown-box mt-10 absolute w-40 top-0 left-0 z-20">
                             <div class="dropdown-box__content box p-2">
-                                <a href="" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md">
+                                <a href="#" id="print" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md">
                                     <i data-feather="printer" class="w-4 h-4 mr-2"></i> Print
                                 </a>
-                                <a href="" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md">
+                                <a href="#" id="export-excel" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md">
                                     <i data-feather="file-text" class="w-4 h-4 mr-2"></i> Export to Excel
                                 </a>
-                                <a href="" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md">
+                                <a href="#" id="export-pdf" class="flex items-center block p-2 transition duration-300 ease-in-out bg-white hover:bg-gray-200 rounded-md">
                                     <i data-feather="file-text" class="w-4 h-4 mr-2"></i> Export to PDF
                                 </a>
                             </div>
@@ -170,7 +175,7 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
                 <!-- BEGIN: Data List -->
                 <div class="intro-y col-span-12 overflow-auto lg:overflow-visible">
-                    <table class="table table-report -mt-2">
+                    <table id="profesorTable" class="table table-report -mt-2">
                         <thead>
                             <tr>
                                 <th class="whitespace-no-wrap">NOMBRE</th>
@@ -193,10 +198,11 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td class="text-center"><?= htmlspecialchars($profesor['profesor_sede']) ?></td>
                                 <td class="text-center"><?= htmlspecialchars($profesor['profesor_saldo']) ?></td>
                                 <td class="text-center"><?= htmlspecialchars($profesor['profesor_programa']) ?></td>
+                                <!-- Dentro del loop foreach de los profesores -->
                                 <td class="table-report__action w-56">
                                     <div class="flex justify-center items-center">
                                         <a class="flex items-center mr-3" href="javascript:;"> <i data-feather="check-square" class="w-4 h-4 mr-1"></i> Edit </a>
-                                        <a class="flex items-center text-theme-6" href="javascript:;"> <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Delete </a>
+                                        <a class="flex items-center text-theme-6 delete-profesor" data-profesor-id="<?= $profesor['id_profesor'] ?>" href="javascript:;"> <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Delete </a>
                                     </div>
                                 </td>
                             </tr>
@@ -233,6 +239,7 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <!-- END: Content -->
     </div>
 
+    <!-- IMPORTACIONES DE LIBRERIAS -->
     <!-- BEGIN: JS Assets-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
@@ -240,7 +247,12 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.10.2/dist/cdn.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script> 
     <!-- END: JS Assets-->
-    <script src="dist/js/app.js"></script>
+    <!-- Incluir la librería SheetJS para exportar a Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.16.9/xlsx.full.min.js"></script>
+    <!-- Incluir la librería jsPDF para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>    
+    <!-- FINAL DE IMPORTACIONES DE LIBRERIAS -->
+
     <!-- Modal JS-->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -293,7 +305,80 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
         });
     </script>
     <!-- Final boton Buscador JS -->
-   
+    <!-- Menu Desplegable Para Exportar -->
+    <script>
+        $(document).ready(function() {
+            // Función para imprimir la tabla
+            $('#print').on('click', function() {
+                var divToPrint = document.getElementById('profesorTable');
+                var newWin = window.open('', 'Print-Window');
+                newWin.document.open();
+                newWin.document.write('<html><body onload="window.print()">' + divToPrint.outerHTML + '</body></html>');
+                newWin.document.close();
+                setTimeout(function() {
+                    newWin.close();
+                }, 10);
+            });
 
+            // Función para exportar a Excel
+            $('#export-excel').on('click', function() {
+                var wb = XLSX.utils.table_to_book(document.getElementById('profesorTable'), {sheet: "Sheet JS"});
+                XLSX.writeFile(wb, 'Professors.xlsx');
+            });
+
+            // Función para exportar a PDF
+            $('#export-pdf').on('click', function() {
+                var doc = new jsPDF('p', 'pt', 'a4');
+                var res = doc.autoTableHtmlToJson(document.getElementById('profesorTable'));
+                doc.autoTable(res.columns, res.data);
+                doc.save('Professors.pdf');
+            });
+         
+        });
+    </script>
+    <!-- Final Menu Desplegable Para Exportar -->
+
+    <!-- CRUD -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Manejar clics en enlaces de eliminación
+            document.querySelectorAll('.delete-profesor').forEach(function (link) {
+                link.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    // Obtener el ID del profesor desde el atributo data-profesor-id
+                    var profesorId = link.getAttribute('data-profesor-id');
+
+                    // Confirmar la eliminación
+                    if (confirm('¿Estás seguro de eliminar este profesor?')) {
+                        // Realizar la solicitud POST a delete.php
+                        fetch('../crud/delete.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                table: 'profesores',
+                                id: profesorId
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            // Mostrar el mensaje de éxito o error
+                            alert(data.message);
+                            // Recargar la página o actualizar la lista de profesores
+                            location.reload(); // Puedes cambiar esto por una actualización parcial según tu preferencia
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Hubo un error al intentar eliminar el profesor.');
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+    <!-- FINAL CRUD -->
+    
 </body>
 </html>
