@@ -41,7 +41,17 @@ try {
         $asignaturas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Obtener los profesores
-        $stmt = $pdo->prepare("SELECT id_profesor, profesor_nombre, profesor_apellido FROM profesores WHERE profesor_sede = :sede");
+        $stmt = $pdo->prepare("
+            SELECT id_profesor, profesor_nombre, profesor_apellido 
+            FROM profesores 
+            WHERE profesor_sede = :sede 
+              AND id_profesor NOT IN (
+                  SELECT horario_profesor 
+                  FROM horarios 
+                  WHERE horario_dia = :dia 
+                    AND horario_hora = :hora
+              )
+        ");
         $stmt->bindParam(':sede', $selected_sede, PDO::PARAM_INT);
         $stmt->execute();
         $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -55,7 +65,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,7 +113,6 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
             <div class="container mt-5"></div>
 
             <div class="intro-y box mt-5">
-                
                 <div class="p-5" id="header-footer-modal">
                     <div class="preview">
                         <div class="text-center">
@@ -111,9 +120,12 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                         </div>
                         <div class="modal" id="header-footer-modal-preview">
                             <div class="modal-dialog">
-                                <div class="modal-header"></div>
+                                <div class="modal-header">
+                                    <h2 class="font-medium text-base mr-auto">Añadir Nuevo Horario</h2>
+                                    <button type="button" class="button w-20 border text-gray-700 mr-1" data-dismiss="modal">Cerrar</button>
+                                </div>
                                 <div class="modal-body">
-                                    <form id="modal-form" method="POST" action="guardar_horario.php">
+                                    <form id="modal-form" method="POST" action="schedule_add.php">
                                         <div class="grid grid-cols-12 gap-4 row-gap-3">
                                             <div class="col-span-12">
                                                 <label>Sede</label>
@@ -121,7 +133,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Día</label>
-                                                <select name="dia" class="input w-full border mt-2 flex-1">
+                                                <select name="dia" id="dia" class="input w-full border mt-2 flex-1">
                                                     <?php foreach ($dias as $dia): ?>
                                                         <option value="<?php echo $dia; ?>"><?php echo $dia; ?></option>
                                                     <?php endforeach; ?>
@@ -129,7 +141,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Horario</label>
-                                                <select name="hora" class="input w-full border mt-2 flex-1">
+                                                <select name="hora" id="hora" class="input w-full border mt-2 flex-1">
                                                     <?php
                                                     $start_time = new DateTime('08:00:00');
                                                     $end_time = new DateTime('21:00:00');
@@ -150,7 +162,7 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                                             </div>
                                             <div class="col-span-12">
                                                 <label>Profesor</label>
-                                                <select name="profesor" class="input w-full border mt-2 flex-1">
+                                                <select name="profesor" id="profesor" class="input w-full border mt-2 flex-1">
                                                     <?php foreach ($profesores as $profesor): ?>
                                                         <option value="<?php echo $profesor['id_profesor']; ?>"><?php echo $profesor['profesor_nombre'] . ' ' . $profesor['profesor_apellido']; ?></option>
                                                     <?php endforeach; ?>
@@ -176,9 +188,9 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                     <table class="table table-report -mt-2">
                         <thead>
                             <tr>
-                                <th class="text-center">Hora</th>
+                                <th class="text-center w-24">Hora</th> <!-- Ancho fijo para la columna de hora -->
                                 <?php foreach ($dias as $dia): ?>
-                                    <th class="text-center"><?php echo $dia; ?></th>
+                                    <th class="text-center w-32"><?php echo $dia; ?></th> <!-- Ancho fijo para las columnas de los días -->
                                 <?php endforeach; ?>
                             </tr>
                         </thead>
@@ -190,9 +202,9 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
                             while ($start_time <= $end_time): ?>
                                 <tr>
-                                    <td class="text-center"><?php echo $start_time->format('H:i'); ?></td>
+                                    <td class="text-center w-24"><?php echo $start_time->format('H:i'); ?></td> <!-- Ancho fijo para las celdas de hora -->
                                     <?php foreach ($dias as $dia): ?>
-                                        <td class="text-center">
+                                        <td class="text-center w-32"> <!-- Ancho fijo para las celdas de los días -->
                                             <?php
                                             foreach ($horarios as $horario) {
                                                 if ($horario['horario_hora'] == $start_time->format('H:i:s') && $horario['horario_dia'] == $dia) {
@@ -227,6 +239,35 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
                 button.closest('.modal').classList.remove('active');
             });
         });
+
+        // Fetch available professors when the day or time changes
+        document.getElementById('dia').addEventListener('change', fetchAvailableProfessors);
+        document.getElementById('hora').addEventListener('change', fetchAvailableProfessors);
+
+        function fetchAvailableProfessors() {
+            const sede = '<?php echo $selected_sede; ?>';
+            const dia = document.getElementById('dia').value;
+            const hora = document.getElementById('hora').value;
+
+            fetch('fetch_available_professors.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ sede, dia, hora }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const profesorSelect = document.getElementById('profesor');
+                profesorSelect.innerHTML = ''; // Clear the current options
+                data.forEach(profesor => {
+                    const option = document.createElement('option');
+                    option.value = profesor.id_profesor;
+                    option.textContent = `${profesor.profesor_nombre} ${profesor.profesor_apellido}`;
+                    profesorSelect.appendChild(option);
+                });
+            });
+        }
     </script>
 </body>
 </html>

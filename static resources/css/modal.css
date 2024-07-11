@@ -17,14 +17,13 @@ html, body {
     justify-content: center;
     align-items: center;
     background-color: rgba(0, 0, 0, 0.5);
-    
 }
 .modal.active {
     display: flex;
 }
 .modal-dialog {
-    background-color: #1f2937; /* Fondo oscuro similar al sidebar */
-    border: 1px solid #4b5563; /* Borde similar al sidebar */
+    background-color: #052a5e; /* Background color similar to sidebar */
+    border: 1px solid #04306e; /* Border color similar to sidebar */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     max-width: 80%;
     width: 400px;
@@ -33,23 +32,12 @@ html, body {
 }
 .modal-header, .modal-footer {
     padding: 1rem;
-    background-color: #374151; /* Color similar al header/footer del sidebar */
-    border-bottom: 1px solid #4b5563; /* Borde inferior similar */
-    color: #ffffff; /* Color de texto blanco */
+    background-color: #374151; /* Background color similar to sidebar headers */
+    border-bottom: 1px solid #4b5563; /* Border color similar to sidebar headers */
     text-align: right;
+    color: #ffffff; /* Text color for better contrast */
 }
 .modal-body {
     padding: 1rem;
-    color: #d1d5db; /* Color de texto claro */
-}
-.button {
-    background-color: #2563eb; /* Botón con color similar al sidebar */
-    color: #ffffff; /* Color de texto del botón */
-    padding: 0.5rem 1rem;
-    border-radius: 0.25rem;
-    border: none;
-    cursor: pointer;
-}
-.button:hover {
-    background-color: #1e3a8a; /* Color de hover del botón */
+    color: #090b0f; /* Text color similar to sidebar */
 }
