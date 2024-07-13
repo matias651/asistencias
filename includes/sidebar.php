@@ -22,7 +22,7 @@
             </a>            
             <ul class="side-menu__sub-open" style="display: block;">
                 <li>
-                    <a href="<?php echo $url . '/views/teachers/teachers-crud.php'; ?>" class="side-menu">
+                    <a href="<?php echo $url . '/views/teachers/teachers_list.php'; ?>" class="side-menu">
                         <div class="side-menu__icon"> <i data-feather="list"></i> </div>
                         <div class="side-menu__title"> Listar Profesores </div>
                     </a>

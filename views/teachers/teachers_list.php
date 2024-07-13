@@ -189,24 +189,28 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </tr>
                         </thead>
                         <tbody>
-                        <?php foreach ($profesores as $profesor): ?>
-                            <tr class="intro-x">
-                                <td><?= htmlspecialchars($profesor['profesor_nombre']) ?></td>
-                                <td><?= htmlspecialchars($profesor['profesor_apellido']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($profesor['profesor_email']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($profesor['profesor_documento']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($profesor['profesor_sede']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($profesor['profesor_saldo']) ?></td>
-                                <td class="text-center"><?= htmlspecialchars($profesor['profesor_programa']) ?></td>
-                                <!-- Dentro del loop foreach de los profesores -->
-                                <td class="table-report__action w-56">
-                                    <div class="flex justify-center items-center">
-                                        <a class="flex items-center mr-3" href="javascript:;"> <i data-feather="check-square" class="w-4 h-4 mr-1"></i> Edit </a>
-                                        <a class="flex items-center text-theme-6 delete-profesor" data-profesor-id="<?= $profesor['id_profesor'] ?>" href="javascript:;"> <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Delete </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
+                            <?php foreach ($profesores as $profesor): ?>
+                                <tr class="intro-x">
+                                    <td><?= htmlspecialchars($profesor['profesor_nombre'] ?? '') ?></td>
+                                    <td><?= htmlspecialchars($profesor['profesor_apellido'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($profesor['profesor_email'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($profesor['profesor_documento'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($profesor['profesor_sede'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($profesor['profesor_saldo'] ?? '') ?></td>
+                                    <td class="text-center"><?= htmlspecialchars($profesor['profesor_programa'] ?? '') ?></td>
+                                    <!-- Dentro del loop foreach de los profesores -->
+                                    <td class="table-report__action w-56">
+                                        <div class="flex justify-center items-center">
+                                            <a class="flex items-center mr-3" href="javascript:;"> 
+                                                <i data-feather="check-square" class="w-4 h-4 mr-1"></i> Edit 
+                                            </a>
+                                            <a class="flex items-center text-theme-6 delete-profesor" data-profesor-id="<?= htmlspecialchars($profesor['id_profesor'] ?? '') ?>" href="teachers-delete.php?id_profesor=<?= htmlspecialchars($profesor['id_profesor'] ?? '') ?>"> 
+                                                <i data-feather="trash-2" class="w-4 h-4 mr-1"></i> Delete 
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -338,46 +342,7 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </script>
     <!-- Final Menu Desplegable Para Exportar -->
 
-    <!-- CRUD -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Manejar clics en enlaces de eliminación
-            document.querySelectorAll('.delete-profesor').forEach(function (link) {
-                link.addEventListener('click', function (event) {
-                    event.preventDefault();
-
-                    // Obtener el ID del profesor desde el atributo data-profesor-id
-                    var profesorId = link.getAttribute('data-profesor-id');
-
-                    // Confirmar la eliminación
-                    if (confirm('¿Estás seguro de eliminar este profesor?')) {
-                        // Realizar la solicitud POST a delete.php
-                        fetch('../crud/delete.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                table: 'profesores',
-                                id: profesorId
-                            })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            // Mostrar el mensaje de éxito o error
-                            alert(data.message);
-                            // Recargar la página o actualizar la lista de profesores
-                            location.reload(); // Puedes cambiar esto por una actualización parcial según tu preferencia
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Hubo un error al intentar eliminar el profesor.');
-                        });
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- CRUD -->    
     <!-- FINAL CRUD -->
     
 </body>
