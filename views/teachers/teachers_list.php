@@ -24,27 +24,43 @@ $start_from = ($page - 1) * $results_per_page;
 // Obtener el término de búsqueda
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
-// Obtener el total de registros en la tabla de profesores
-$sql_count = "SELECT COUNT(id_profesor) AS total FROM profesores WHERE profesor_nombre LIKE :search OR profesor_apellido LIKE :search OR profesor_email LIKE :search OR profesor_documento LIKE :search";
-$stmt_count = $pdo->prepare($sql_count);
-$search_term = '%' . $search . '%';
-$stmt_count->bindParam(':search', $search_term, PDO::PARAM_STR);
-$stmt_count->execute();
-$row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
-$total_results = $row_count['total'];
+try {
+    // Obtener el total de registros en la tabla de profesores
+    $sql_count = "SELECT COUNT(id_profesor) AS total FROM profesores WHERE profesor_nombre LIKE :search OR profesor_apellido LIKE :search OR profesor_email LIKE :search OR profesor_documento LIKE :search";
+    $stmt_count = $pdo->prepare($sql_count);
+    $search_term = '%' . $search . '%';
+    $stmt_count->bindParam(':search', $search_term, PDO::PARAM_STR);
+    $stmt_count->execute();
+    $row_count = $stmt_count->fetch(PDO::FETCH_ASSOC);
+    $total_results = $row_count['total'];
 
-// Calcular el número total de páginas
-$total_pages = ceil($total_results / $results_per_page);
+    // Calcular el número total de páginas
+    $total_pages = ceil($total_results / $results_per_page);
 
-// Obtener los profesores de la base de datos con limitación y desplazamiento para la paginación
-$sql = "SELECT * FROM profesores WHERE profesor_nombre LIKE :search OR profesor_apellido LIKE :search OR profesor_email LIKE :search OR profesor_documento LIKE :search LIMIT :start_from, :results_per_page";
-$stmt = $pdo->prepare($sql);
-$stmt->bindParam(':start_from', $start_from, PDO::PARAM_INT);
-$stmt->bindParam(':results_per_page', $results_per_page, PDO::PARAM_INT);
-$stmt->bindParam(':search', $search_term, PDO::PARAM_STR);
-$stmt->execute();
-$profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Obtener los profesores de la base de datos con limitación y desplazamiento para la paginación
+    $sql = "SELECT * FROM profesores WHERE profesor_nombre LIKE :search OR profesor_apellido LIKE :search OR profesor_email LIKE :search OR profesor_documento LIKE :search LIMIT :start_from, :results_per_page";
+    $stmt = $pdo->prepare($sql);
+    $stmt->bindParam(':start_from', $start_from, PDO::PARAM_INT);
+    $stmt->bindParam(':results_per_page', $results_per_page, PDO::PARAM_INT);
+    $stmt->bindParam(':search', $search_term, PDO::PARAM_STR);
+    $stmt->execute();
+    $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Devolver resultados como JSON
+    $response = [
+        'total_results' => $total_results,
+        'total_pages' => $total_pages,
+        'current_page' => $page,
+        'results_per_page' => $results_per_page,
+        'profesores' => $profesores
+    ];
+   
+} catch (PDOException $e) {
+    // Manejo de errores de PDO
+    echo "Error al ejecutar la consulta: " . $e->getMessage();
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -99,45 +115,53 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <h2 class="font-medium text-base mr-auto text-center">Agregar Profesor</h2>                                  
                             </div>
                             <div class="modal-body">
-                                <div class="grid grid-cols-12 gap-4 row-gap-3">
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Nombre</label>
-                                        <input type="text" class="input w-full border mt-2 flex-1" placeholder="Nombre">
+                                <form id="add-professor-form" action="teachers_list.php" method="POST">
+                                    <div class="grid grid-cols-12 gap-4 row-gap-3">
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Nombre</label>
+                                            <input type="text" name="nombre" class="input w-full border mt-2 flex-1" placeholder="Nombre" required>
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Apellido</label>
+                                            <input type="text" name="apellido" class="input w-full border mt-2 flex-1" placeholder="Apellido" required>
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Email</label>
+                                            <input type="email" name="email" class="input w-full border mt-2 flex-1" placeholder="Email" required>
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Documento</label>
+                                            <input type="text" name="documento" class="input w-full border mt-2 flex-1" placeholder="Documento" required>
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Cede</label>
+                                            <select id="sede-select" name="sede-select" class="input w-full border mt-2 flex-1" required>
+                                                <option value="">Seleccione una sede</option>
+                                                <!-- Opciones de sedes cargadas dinámicamente por JavaScript -->
+                                            </select>
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Saldo</label>
+                                            <input type="text" name="saldo" class="input w-full border mt-2 flex-1" placeholder="Saldo" required>
+                                        </div>
+                                        <div class="col-span-12 sm:col-span-6">
+                                            <label>Programa</label>
+                                            <select id="programa" name="programa" class="input w-full border mt-2 flex-1" required>
+                                                <option value="">Seleccione un programa</option>
+                                                <!-- Opciones de programas cargadas dinámicamente por JavaScript -->
+                                            </select>
+                                        </div>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Apellido</label>
-                                        <input type="text" class="input w-full border mt-2 flex-1" placeholder="Apellido">
+                                    <div class="modal-footer">
+                                        <button type="button" class="button w-20 border text-gray-700 mr-1" data-dismiss="modal">Cancelar</button>
+                                        <button type="submit" class="button w-20 bg-theme-1 text-white">Guardar</button>
                                     </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Email</label>
-                                        <input type="email" class="input w-full border mt-2 flex-1" placeholder="Email">
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Documento</label>
-                                        <input type="text" class="input w-full border mt-2 flex-1" placeholder="Documento">
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Cede</label>
-                                        <input type="text" class="input w-full border mt-2 flex-1" placeholder="Cede">
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Saldo</label>
-                                        <input type="text" class="input w-full border mt-2 flex-1" placeholder="Saldo">
-                                    </div>
-                                    <div class="col-span-12 sm:col-span-6">
-                                        <label>Programa</label>
-                                        <input type="text" class="input w-full border mt-2 flex-1" placeholder="Programa">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                            <!-- <button class="button border items-center text-gray-700 hidden sm:flex" data-dismiss="modal"> <i data-feather="x" class="w-4 h-4 mr-2"></i> Close </button> -->
-                                <button type="button" class="button w-20 border text-gray-700 mr-1" data-dismiss="modal">Cancelar</button>
-                                <button type="button" class="button w-20 bg-theme-1 text-white">Guardar</button>
+                                </form>
                             </div>
                         </div>
                     </div>
                     <!-- END: Agregar Profesor Modal -->
+
                     <div class="dropdown relative">
                         <button class="dropdown-toggle button px-2 box text-gray-700">
                             <!-- Reemplazar el icono por una imagen -->
@@ -257,11 +281,47 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>    
     <!-- FINAL DE IMPORTACIONES DE LIBRERIAS -->
 
-    <!-- Modal JS-->
+    <!-- Modal JS -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             var openModalButtons = document.querySelectorAll('[data-toggle="modal"]');
             var closeModalButtons = document.querySelectorAll('[data-dismiss="modal"]');
+            var sedeSelect = document.getElementById('sede-select');
+            var programaSelect = document.getElementById('programa');
+
+            // Función para cargar las sedes
+            function loadSedes() {
+                fetch('../sedes/sedes_list.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Limpiar opciones anteriores
+                        sedeSelect.innerHTML = '<option value="">Seleccione una sede</option>';
+                        data.forEach(sede => {
+                            var option = document.createElement('option');
+                            option.value = sede.id_sede;
+                            option.textContent = sede.sede_nombre;
+                            sedeSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            // Función para cargar los programas
+            function loadProgramas() {
+                fetch('../programs/programs_list.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Limpiar opciones anteriores
+                        programaSelect.innerHTML = '<option value="">Seleccione un programa</option>';
+                        data.forEach(programa => {
+                            var option = document.createElement('option');
+                            option.value = programa.id_programa;
+                            option.textContent = programa.programa_nombre;
+                            programaSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
 
             openModalButtons.forEach(function (button) {
                 button.addEventListener('click', function () {
@@ -269,6 +329,8 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     var targetModal = document.querySelector(targetModalId);
                     if (targetModal) {
                         targetModal.classList.add('active');
+                        loadSedes(); // Llamar a la función para cargar las sedes
+                        loadProgramas(); // Llamar a la función para cargar los programas
                     }
                 });
             });
@@ -340,10 +402,94 @@ $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
          
         });
     </script>
-    <!-- Final Menu Desplegable Para Exportar -->
+    <!-- Final Menu Desplegable Para Exportar -->    
+   
+    <!-- Agregar profesor -->
+    <script>
+        // Función para mostrar el modal de registro de profesor
+        function showModal() {
+            // Limpiar los campos del formulario cuando se muestra el modal
+            $('#profesor_nombre').val('');
+            $('#profesor_apellido').val('');
+            $('#profesor_email').val('');
+            $('#profesor_documento').val('');
+            $('#profesor_sede').val('');
+            $('#profesor_plan').val('');
+            $('#profesor_programa').val('');
+            $('#profesor_saldo').val('');
+            
+            // Cargar la lista de sedes desde la base de datos
+            $.ajax({
+                url: 'sedes.php', // Ruta al archivo PHP que obtiene las sedes
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    // Limpiar el dropdown de sedes
+                    $('#profesor_sede').empty();
+                    // Iterar sobre las sedes obtenidas y agregarlas al dropdown
+                    $.each(response, function(index, sede) {
+                        $('#profesor_sede').append('<option value="' + sede.id_sede + '">' + sede.sede_nombre + '</option>');
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al cargar las sedes:', error);
+                }
+            });
 
-    <!-- CRUD -->    
-    <!-- FINAL CRUD -->
-    
+            // Mostrar el modal de registro de profesor
+            $('#profesorModal').modal('show');
+        }
+
+        // Función para guardar un nuevo profesor
+        function guardarProfesor() {
+            // Obtener los valores de los campos del formulario
+            var nombre = $('#profesor_nombre').val();
+            var apellido = $('#profesor_apellido').val();
+            var email = $('#profesor_email').val();
+            var documento = $('#profesor_documento').val();
+            var sede = $('#profesor_sede').val();
+            var plan = $('#profesor_plan').val();
+            var programa = $('#profesor_programa').val();
+            var saldo = $('#profesor_saldo').val();
+
+            // Validar que los campos obligatorios no estén vacíos
+            if (nombre && apellido && email && documento && sede && plan && programa && saldo) {
+                // Objeto con los datos del profesor a guardar
+                var profesorData = {
+                    nombre: nombre,
+                    apellido: apellido,
+                    email: email,
+                    documento: documento,
+                    sede: sede,
+                    plan: plan,
+                    programa: programa,
+                    saldo: saldo
+                };
+
+                // Enviar los datos del profesor al servidor usando AJAX
+                $.ajax({
+                    url: 'guardar_profesor.php', // Ruta al archivo PHP para guardar el profesor
+                    type: 'POST',
+                    data: profesorData,
+                    success: function(response) {
+                        console.log('Profesor guardado exitosamente:', response);
+                        // Opcional: cerrar el modal después de guardar
+                        $('#profesorModal').modal('hide');
+                        // Recargar la lista de profesores o hacer alguna otra acción necesaria
+                        // Por ejemplo, actualizar la tabla de profesores en la página
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error al guardar el profesor:', error);
+                        // Manejar errores como desees, por ejemplo, mostrando un mensaje al usuario
+                    }
+                });
+            } else {
+                // Mostrar un mensaje de error al usuario si faltan campos obligatorios
+                alert('Por favor completa todos los campos obligatorios.');
+            }
+        }
+    </script>
+    <!-- Final de Agregar profesor -->
+
 </body>
 </html>
