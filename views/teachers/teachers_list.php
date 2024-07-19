@@ -9,6 +9,37 @@ if (session_status() == PHP_SESSION_NONE) {
 // Inclusión del archivo de configuración
 require_once __DIR__ . "/../../config.php"; // Utilizando una ruta absoluta
 
+// Verificar si se envió el formulario para agregar un nuevo profesor
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $nombre = $_POST['nombre'];
+    $apellido = $_POST['apellido'];
+    $email = $_POST['email'];
+    $documento = $_POST['documento'];
+    $sede = $_POST['sede-select'];
+    $saldo = $_POST['saldo'];
+    $programa = $_POST['programa'];
+
+    // Insertar el nuevo profesor en la base de datos
+    try {
+        $sql_insert = "INSERT INTO profesores (profesor_nombre, profesor_apellido, profesor_email, profesor_documento, profesor_sede, profesor_saldo, profesor_programa) VALUES (:nombre, :apellido, :email, :documento, :sede, :saldo, :programa)";
+        $stmt_insert = $pdo->prepare($sql_insert);
+        $stmt_insert->bindParam(':nombre', $nombre, PDO::PARAM_STR);
+        $stmt_insert->bindParam(':apellido', $apellido, PDO::PARAM_STR);
+        $stmt_insert->bindParam(':email', $email, PDO::PARAM_STR);
+        $stmt_insert->bindParam(':documento', $documento, PDO::PARAM_STR);
+        $stmt_insert->bindParam(':sede', $sede, PDO::PARAM_STR);
+        $stmt_insert->bindParam(':saldo', $saldo, PDO::PARAM_STR);
+        $stmt_insert->bindParam(':programa', $programa, PDO::PARAM_STR);
+        $stmt_insert->execute();
+        
+        // Redireccionar para evitar reenvío del formulario
+        header("Location: teachers_list.php");
+        exit();
+    } catch (PDOException $e) {
+        echo "Error al agregar el profesor: " . $e->getMessage();
+    }
+}
+
 // Definir el número de resultados por página
 $results_per_page = isset($_GET['results_per_page']) ? (int)$_GET['results_per_page'] : 10;
 
@@ -60,6 +91,7 @@ try {
     echo "Error al ejecutar la consulta: " . $e->getMessage();
 }
 ?>
+
 
 
 <!DOCTYPE html>

@@ -16,8 +16,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Validar y sanitizar los datos (puedes implementar validaciones más robustas aquí)
 
     // Preparar la consulta SQL para insertar un nuevo profesor
-    $sql = "INSERT INTO profesores (profesor_nombre, profesor_apellido, profesor_email, profesor_documento, profesor_sede, profesor_saldo, profesor_programa) 
-            VALUES (:nombre, :apellido, :email, :documento, :sede, :saldo, :programa)";
+    $sql = "INSERT INTO profesores (profesor_nombre, profesor_apellido, profesor_email, profesor_documento, profesor_sede, profesor_saldo, profesor_programa, fechaYhora_creacion) 
+            VALUES (:nombre, :apellido, :email, :documento, :sede, :saldo, :programa, NOW())";
     $stmt = $pdo->prepare($sql);
 
     // Bind parameters
