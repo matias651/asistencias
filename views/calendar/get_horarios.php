@@ -1,58 +1,33 @@
 <?php
-require_once dirname(__DIR__) . "../../config.php";
+// get_horarios.php
 
-if (isset($_POST['sede_id'])) {
+// Incluir el archivo de configuración y establecer la conexión PDO ($pdo)
+require_once __DIR__ . "/../../config.php";
+
+// Verificar si se recibieron los datos necesarios por POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['sede_id']) && isset($_POST['dia'])) {
     $sede_id = $_POST['sede_id'];
+    $dia = $_POST['dia'];
 
-    // Obtener los horarios de la base de datos
-    $query_horarios = "
-        SELECT 
-            horario_hora, 
-            horario_dia 
-        FROM 
-            horarios 
-        WHERE 
-            horario_sede = $sede_id
-        ORDER BY 
-            horario_hora ASC";
-    $result_horarios = mysqli_query($conn, $query_horarios);
-    $horarios = mysqli_fetch_all($result_horarios, MYSQLI_ASSOC);
-    
-    // Crear un array para almacenar los horarios por día y hora
-    $agenda = [];
-    foreach ($horarios as $horario) {
-        $agenda[$horario['horario_hora']][$horario['horario_dia']] = true;
-    }
+    try {
+        // Consulta para obtener las horas disponibles para el día y sede especificados
+        $stmt = $pdo->prepare("
+            SELECT h.id_hora, h.hora
+            FROM horas h
+            LEFT JOIN horarios ho ON h.id_hora = ho.horario_hora AND ho.horario_dia = :dia AND ho.horario_sede = :sede_id
+            WHERE ho.horario_hora IS NULL
+        ");
+        $stmt->execute(['dia' => $dia, 'sede_id' => $sede_id]);
+        $horarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    echo '<table class="table-auto w-full">';
-    echo '<thead>';
-    echo '<tr>';
-    echo '<th>Hora</th>';
-    echo '<th>Lunes</th>';
-    echo '<th>Martes</th>';
-    echo '<th>Miércoles</th>';
-    echo '<th>Jueves</th>';
-    echo '<th>Viernes</th>';
-    echo '<th>Sábado</th>';
-    echo '</tr>';
-    echo '</thead>';
-    echo '<tbody>';
-
-    $start_time = strtotime('08:00');
-    $end_time = strtotime('22:00');
-    $interval = 60 * 60; // 1 hora
-
-    for ($time = $start_time; $time <= $end_time; $time += $interval) {
-        $hour = date('H:i', $time);
-        echo '<tr>';
-        echo '<td>' . $hour . '</td>';
-        for ($day = 1; $day <= 6; $day++) {
-            echo '<td>' . (isset($agenda[$hour][$day]) ? 'Ocupado' : 'Libre') . '</td>';
+        // Generar opciones para cada hora disponible
+        foreach ($horarios as $horario) {
+            echo '<option value="' . $horario['id_hora'] . '">' . $horario['hora'] . '</option>';
         }
-        echo '</tr>';
+    } catch (PDOException $e) {
+        echo 'Error al obtener horarios disponibles: ' . $e->getMessage();
     }
-
-    echo '</tbody>';
-    echo '</table>';
+} else {
+    echo 'No se recibieron datos válidos para la consulta de horarios.';
 }
 ?>

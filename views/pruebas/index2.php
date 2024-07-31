@@ -1,94 +1,134 @@
+<?php
+// Incluir el archivo de configuración de la base de datos
+require '../../config.php';
+
+try {
+    // Consulta SQL para obtener las sedes
+    $sql = "SELECT id_sede, sede_nombre FROM sedes";
+    $stmt = $pdo->query($sql); // $pdo debe estar definido desde config.php
+    $sedes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Devolver las sedes en formato JSON
+    header('Content-Type: application/json');
+    echo json_encode($sedes);
+} catch (PDOException $e) {
+    // Manejo de errores de conexión o consulta
+    die("Error de conexión: " . $e->getMessage());
+}
+?>
+
+
+
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modal con Profesores Disponibles</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ejemplo de Modal con Lista Desplegable</title>
+<style>
+/* Estilos para el modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 600px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
 </head>
 <body>
 
 <!-- Botón para abrir el modal -->
-<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#profesoresModal">
-    Ver Profesores Disponibles
-</button>
+<button id="openModalBtn">Abrir Modal</button>
 
 <!-- Modal -->
-<div class="modal fade" id="profesoresModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Profesores Disponibles</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <!-- Formulario de selección de día y hora -->
-                <form id="formSeleccion">
-                    <div class="form-group">
-                        <label for="dia">Día</label>
-                        <select id="dia" class="form-control">
-                            <option value="lunes">Lunes</option>
-                            <option value="martes">Martes</option>
-                            <option value="miércoles">Miércoles</option>
-                            <option value="jueves">Jueves</option>
-                            <option value="viernes">Viernes</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="hora">Hora</label>
-                        <select id="hora" class="form-control">
-                            <!-- Las opciones de hora se rellenarán dinámicamente con PHP -->
-                            <?php
-                            include 'config.php';
-
-                            $sqlHoras = "SELECT id_hora, hora FROM horas";
-                            $stmtHoras = $conexion->prepare($sqlHoras);
-                            $stmtHoras->execute();
-                            $horas = $stmtHoras->fetchAll(PDO::FETCH_ASSOC);
-
-                            foreach ($horas as $hora) {
-                                echo "<option value='" . $hora['id_hora'] . "'>" . $hora['hora'] . "</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                </form>
-                <!-- Contenedor para la lista de profesores disponibles -->
-                <div id="listaProfesores">
-                    Seleccione un día y una hora para ver los profesores disponibles.
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-            </div>
-        </div>
-    </div>
+<div id="myModal" class="modal">
+  <!-- Contenido del modal -->
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h2>Selecciona una sede</h2>
+    <select id="sedeSelect">
+      <!-- Opciones de sedes se cargarán aquí dinámicamente -->
+    </select>
+    <button id="selectSedeBtn">Seleccionar</button>
+  </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
-$(document).ready(function() {
-    $('#dia, #hora').change(function() {
-        var dia = $('#dia').val();
-        var hora = $('#hora').val();
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('myModal');
+  const btn = document.getElementById('openModalBtn');
+  const closeBtn = document.getElementsByClassName('close')[0];
+  const selectBtn = document.getElementById('selectSedeBtn');
+  const sedeSelect = document.getElementById('sedeSelect');
 
-        $.ajax({
-            url: 'obtener_profesores.php',
-            type: 'POST',
-            data: {
-                dia: dia,
-                hora: hora
-            },
-            success: function(response) {
-                $('#listaProfesores').html(response);
-            }
-        });
-    });
+  // Función para abrir el modal
+  btn.onclick = function() {
+    modal.style.display = 'block';
+  }
+
+  // Función para cerrar el modal al hacer clic en la X
+  closeBtn.onclick = function() {
+    modal.style.display = 'none';
+  }
+
+  // Función para cerrar el modal al hacer clic fuera del contenido
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  }
+
+  // Evento para seleccionar una sede y hacer algo con ella
+  selectBtn.onclick = function() {
+    const selectedSede = sedeSelect.value;
+    // Aquí puedes agregar la lógica para manejar la sede seleccionada
+    console.log('Sede seleccionada:', selectedSede);
+    modal.style.display = 'none'; // Cerrar el modal después de seleccionar
+  }
+
+  // Realizar una solicitud para obtener las sedes desde el servidor
+  fetch('get_sedes.php')
+    .then(response => response.json())
+    .then(data => {
+      data.forEach(sede => {
+        const option = document.createElement('option');
+        option.value = sede.id_sede;
+        option.textContent = sede.sede_nombre;
+        sedeSelect.appendChild(option);
+      });
+    })
+    .catch(error => console.error('Error al obtener sedes:', error));
 });
 </script>
+
 </body>
 </html>

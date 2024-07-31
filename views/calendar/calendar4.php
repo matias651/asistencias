@@ -112,74 +112,20 @@ $dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
             <div class="container mt-5"></div>
 
-            <div class="intro-y box mt-5">
-                <div class="p-5" id="header-footer-modal">
-                    <div class="preview">
-                        <div class="text-center">
-                            <a href="javascript:;" data-toggle="modal" data-target="#header-footer-modal-preview" class="button inline-block bg-theme-1 text-white">Show Modal</a>
-                        </div>
-                        <div class="modal" id="header-footer-modal-preview">
-                            <div class="modal-dialog">
-                                <div class="modal-header">
-                                    <h2 class="font-medium text-base mr-auto">Añadir Nuevo Horario</h2>
-                                    <button type="button" class="button w-20 border text-gray-700 mr-1" data-dismiss="modal">Cerrar</button>
-                                </div>
-                                <div class="modal-body">
-                                    <form id="modal-form" method="POST" action="schedule_add.php">
-                                        <div class="grid grid-cols-12 gap-4 row-gap-3">
-                                            <div class="col-span-12">
-                                                <label>Sede</label>
-                                                <input type="text" class="input w-full border mt-2 flex-1" value="<?php echo $selected_sede ? $sedes[array_search($selected_sede, array_column($sedes, 'id_sede'))]['sede_nombre'] : ''; ?>" disabled>
-                                            </div>
-                                            <div class="col-span-12">
-                                                <label>Día</label>
-                                                <select name="dia" id="dia" class="input w-full border mt-2 flex-1">
-                                                    <?php foreach ($dias as $dia): ?>
-                                                        <option value="<?php echo $dia; ?>"><?php echo $dia; ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                            <div class="col-span-12">
-                                                <label>Horario</label>
-                                                <select name="hora" id="hora" class="input w-full border mt-2 flex-1">
-                                                    <?php
-                                                    $start_time = new DateTime('08:00:00');
-                                                    $end_time = new DateTime('21:00:00');
-                                                    $interval = new DateInterval('PT1H');
-                                                    while ($start_time <= $end_time): ?>
-                                                        <option value="<?php echo $start_time->format('H:i'); ?>"><?php echo $start_time->format('H:i'); ?></option>
-                                                        <?php $start_time->add($interval); ?>
-                                                    <?php endwhile; ?>
-                                                </select>
-                                            </div>
-                                            <div class="col-span-12">
-                                                <label>Asignatura</label>
-                                                <select name="asignatura" class="input w-full border mt-2 flex-1">
-                                                    <?php foreach ($asignaturas as $asignatura): ?>
-                                                        <option value="<?php echo $asignatura['id_asignatura']; ?>"><?php echo $asignatura['asignatura_nombre']; ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                            <div class="col-span-12">
-                                                <label>Profesor</label>
-                                                <select name="profesor" id="profesor" class="input w-full border mt-2 flex-1">
-                                                    <?php foreach ($profesores as $profesor): ?>
-                                                        <option value="<?php echo $profesor['id_profesor']; ?>"><?php echo $profesor['profesor_nombre'] . ' ' . $profesor['profesor_apellido']; ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="button w-20 border text-gray-700 mr-1" data-dismiss="modal">Cancel</button>
-                                    <button type="submit" form="modal-form" class="button w-20 bg-theme-1 text-white">Guardar</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          
+                            <!-- Modal -->
+<div id="horariosModal" class="modal">
+    <div class="modal-content">
+        <span data-dismiss="modal" class="close-button">&times;</span>
+        <h2 class="text-lg font-medium mt-4 mb-4 text-center">Horarios Semanales</h2>
+        <div class="grid grid-cols-7 gap-4 p-4">
+            <?php foreach ($dias as $dia): ?>
+                <div class="text-center"><?php echo $dia; ?></div>
+            <?php endforeach; ?>
+            <!-- Aquí puedes agregar más contenido dinámico según tu necesidad -->
+        </div>
+    </div>
+</div>
 
             <!-- Agenda semanal -->
             <h2 class="intro-y text-lg font-medium mt-10">Agenda Semanal</h2>

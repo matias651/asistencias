@@ -13,24 +13,22 @@ require_once __DIR__ . "/../../config.php";
 
 $sede_id = $_GET['sede_id'];
 $dia = $_GET['dia'];
-$hora = $_GET['hora'];
 
 try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Obtener los profesores de la sede especificada que no están ocupados en el día y hora seleccionados
+    // Obtener los profesores que no están ocupados en el día seleccionado en la sede seleccionada
     $stmt = $pdo->prepare('
         SELECT id_profesor, profesor_nombre 
         FROM profesores 
-        WHERE profesor_sede = :sede_id 
-        AND id_profesor NOT IN (
+        WHERE id_profesor NOT IN (
             SELECT horario_profesor 
             FROM horarios 
-            WHERE horario_dia = :dia AND horario_hora = :hora
+            WHERE horario_dia = :dia AND horario_sede = :sede_id
         )
     ');
 
-    $stmt->execute(['sede_id' => $sede_id, 'dia' => $dia, 'hora' => $hora]);
+    $stmt->execute(['dia' => $dia, 'sede_id' => $sede_id]);
     $profesores = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($profesores as $profesor) {
